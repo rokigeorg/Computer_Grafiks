@@ -26,7 +26,7 @@ import graphicslib3D.MatrixStack;
 public class FlyingHelicopter extends JFrame implements GLEventListener {
 	private int rendering_program;
 	// we have 2 objects (2 floors)
-	private int numberObjects = 6;
+	private int numberObjects = 12;
 	private int numberPerObject = 3;
 	private int vao[] = new int[numberObjects];
 	// for each object we will 3 attributes: position, color, indices
@@ -63,7 +63,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	private float b2frontX, b2frontY, b2frontZ;
 	private float b2backX, b2backY, b2backZ;
 
-	private MatrixStack mvStack = new MatrixStack(20);
+	private MatrixStack mvStack = new MatrixStack(40);
 
 	public FlyingHelicopter() {
 		setTitle("Final Project- draw helicopter flight");
@@ -195,17 +195,24 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		float aspect = (float) myCanvas.getWidth() / (float) myCanvas.getHeight();
 		Matrix3D pMat = perspective(60.0f, aspect, 0.1f, 1000.0f);
 
+		
 		// here we will build the stack of the vMat and mMat
 		// TODO 01
 		mvStack.pushMatrix();
 		mvStack.translate(-cameraX, -cameraY, -cameraZ); // this is the vMat
 
+		// copies matrices into uniform variables
+		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
+		gl.glUniformMatrix4fv(proj_loc, 1, false, pMat.getFloatValues(), 0);
+
 		// is now handled in mvStack (see TODO 01)
 		// build the view matrix
 		// Matrix3D vMat = new Matrix3D();
 		// vMat.translate(-cameraX, -cameraY, -cameraZ);
+		
 
 
+		this.drawBox1(gl, pMat,mv_loc, proj_loc);
 		this.drawBox2(gl, pMat,mv_loc, proj_loc);
 
 		
@@ -233,16 +240,14 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
 		mvStack.translate(b2floorX, b2floorY, b2floorZ);
 
-		// copies matrices into uniform variables
-		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
-		gl.glUniformMatrix4fv(proj_loc, 1, false, pMat.getFloatValues(), 0);
-
+		
 		// now draw:
 		gl.glEnable(GL_DEPTH_TEST);
 		// draw floor 2
 		drawObject(1);
 
 		// pop model matrix for first object from stack //side left
+		mvStack.popMatrix();
 		mvStack.popMatrix();
 
 		// now create second model matrix on the stack //side left
@@ -303,13 +308,100 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		drawObject(5);
 	}
 
+	private void drawBox1(GL4 gl,Matrix3D pMat, int mv_loc, int proj_loc) {
+		double rotateDeg = 45.0;//(double) System.currentTimeMillis() / 10.0;
+
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1ceilX, b1ceilY, b1ceilZ);
+		
+		// get openGL ready to draw model now
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw floor
+		drawObject(6);
+
+		// pop model matrix for first object from stack //ceil
+		mvStack.popMatrix();
+
+		// now create second model matrix on the stack //floor
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1floorX, b1floorY, b1floorZ);
+
+		// now draw:
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw floor 2
+		drawObject(7);
+
+		// pop model matrix for first object from stack //side left
+		mvStack.popMatrix();
+
+		// now create second model matrix on the stack //side left
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1lSideX, b1lSideY, b1lSideZ);
+
+		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
+
+		// now draw:
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw left side
+		drawObject(8);
+
+		// pop model matrix for first object from stack //side right
+		mvStack.popMatrix();
+
+		// now create second model matrix on the stack //side right
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1rSideX, b1rSideY, b1rSideZ);
+
+		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
+
+		// now draw:
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw left side
+		drawObject(9);
+
+		// pop model matrix for first object from stack //front
+		mvStack.popMatrix();
+
+		// now create second model matrix on the stack //front
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1frontX, b1frontY, b1frontZ);
+
+		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
+
+		// now draw:
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw front side
+		drawObject(10);
+
+		// pop model matrix for first object from stack //back
+		mvStack.popMatrix();
+
+		// now create second model matrix on the stack //back
+		mvStack.pushMatrix();
+		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
+		mvStack.translate(b1backX, b1backY, b1backZ);
+
+		gl.glUniformMatrix4fv(mv_loc, 1, false, mvStack.peek().getFloatValues(), 0);
+
+		// now draw:
+		gl.glEnable(GL_DEPTH_TEST);
+		// draw back side
+		drawObject(11);
+		
+	}
+	
 	// first init is called
 	public void init(GLAutoDrawable drawable) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		rendering_program = createShaderProgram();
 		cameraX = 0.0f;
 		cameraY = 0.0f;
-		cameraZ = 2.0f;
+		cameraZ = 4.0f;
 
 		initBox1();
 		initBox2();
@@ -330,11 +422,11 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 				  0.5f, 0.0f, 0.5f };
 		 
 		 
-		  float[] b1floor_col = { 
-				  0.0f, 0.0f, 1.0f, 
-				  0.0f, 0.0f, 1.0f,  
-				  0.0f, 0.0f, 1.0f, 
-				  0.0f, 0.0f, 1.0f };
+		  float[] b1floor_col = { //
+					0.89f, 1.0f, 0.0f, //
+					0.89f, 1.0f, 0.0f, //
+					0.89f, 1.0f, 0.0f, //
+					0.89f, 1.0f, 0.0f };
 		  
 		  float[] b1side_verts = { // 
 				  0.0f, -0.5f, -0.5f, // 
@@ -342,23 +434,23 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 				  0.0f,0.5f, 0.5f, // 
 				  0.0f, 0.5f, -0.5f };
 		  
-		 float[] b1side_col = { // 
-				 0.0f, 0.5f, 0.0f, // 
-				 0.0f, 0.5f, 0.0f, // 
-				 0.0f, 0.5f,0.0f, // 
-				 0.0f, 0.5f, 0.0f };
-		  
+		 float[] b1side_col = { //
+					0.82f, 1.0f, 0.0f, //
+					0.82f, 1.0f, 0.0f, //
+					0.82f, 1.0f, 0.0f, //
+					0.82f, 1.0f, 0.0f };
+		 
 		 float[] b1front_verts = { // 
 				 0.5f, -0.5f, 0.0f, // 
 				 -0.5f, -0.5f, 0.0f, //
 				 -0.5f, 0.5f, 0.f, //
 				 0.5f, 0.5f, 0.0f };
 		  
-		  float[] b1front_col = { // 
-				  0.0f, 1.0f, 0.0f, // 
-				  1.0f, 0.0f, 0.0f, // 
-				  0.0f, 0.0f, 1.0f, // 
-				  1.0f, 0.0f, 1.0f };
+		  float[] b1front_col = { //
+					0.85f, 1.0f, 0.0f, //
+					0.85f, 1.0f, 0.0f, //
+					0.85f, 1.0f, 0.0f, //
+					0.85f, 1.0f, 0.0f };
 		 //
 
 		float[] floor_verts = { //
@@ -396,11 +488,46 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 				1.0f, 1.0f, 0.0f, //
 				1.0f, 1.0f, 0.0f, //
 				1.0f, 1.0f, 0.0f };
+		//rotor
+		float[] b3floor_verts = { //
+				0.9f, 0.0f, -0.1f, //
+				-0.9f, 0.0f, -0.1f, //
+				-0.9f, 0.0f, 0.1f, //
+				0.9f, 0.0f, 0.1f };
+
+		float[] b3floor_col = { //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f };
+
+		float[] b3side_verts = { //
+				0.0f, -0.2f, -0.1f, //
+				0.0f, -0.2f, 0.1f, //
+				0.0f, 0.2f, 0.1f, //
+				0.0f, 0.2f, -0.1f };
+
+		float[] b3side_col = { //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f };
+
+		float[] b3front_verts = { //
+				0.1f, -0.2f, 0.0f, //
+				-0.1f, -0.2f, 0.0f, //
+				-0.1f, 0.2f, 0.f, //
+				0.1f, 0.2f, 0.0f };
+
+		float[] b3front_col = { //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f, //
+				1.0f, 1.0f, 0.0f };
 
 		int[] indices = { 0, 1, 2, 0, 2, 3 };
 
 		initObject(0, floor_verts, floor_col, indices, Types.TRIANGLES);
-
 		// init ceil
 		initObject(1, floor_verts, floor_col, indices, Types.TRIANGLES);
 		// init right side
@@ -411,32 +538,45 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		initObject(4, front_verts, front_col, indices, Types.TRIANGLES);
 		// init back
 		initObject(5, front_verts, front_col, indices, Types.TRIANGLES);
+		
+		//box1 initObj
+		initObject(6, b1floor_verts, b1floor_col, indices, Types.TRIANGLES);
+		// init ceil
+		initObject(7, b1floor_verts, b1floor_col, indices, Types.TRIANGLES);
+		// init right side
+		initObject(8, b1side_verts, b1side_col, indices, Types.TRIANGLES);
+		// left side
+		initObject(9, b1side_verts, b1side_col, indices, Types.TRIANGLES);
+		// init front
+		initObject(10, b1front_verts, b1front_col, indices, Types.TRIANGLES);
+		// init back
+		initObject(11, b1front_verts, b1front_col, indices, Types.TRIANGLES);
 	}
 
 	private void initBox1() {
 		// box 1
 		b1floorX = 0.0f;
-		b1floorY = -0.5f;
+		b1floorY = -0.5f - 0.5f;
 		b1floorZ = 0.0f;
 
 		b1ceilX = 0.0f;
-		b1ceilY = 0.5f;
+		b1ceilY = 0.5f - 0.5f;
 		b1ceilZ = 0.0f;
 
 		this.b1lSideX = -0.5f;
-		this.b1lSideY = 0.0f;
-		this.b1lSideY = 0.0f;
+		this.b1lSideY = 0.0f - 0.5f;
+		this.b1lSideZ = 0.0f;
 
 		this.b1rSideX = 0.5f;
-		this.b1rSideY = 0.0f;
-		this.b1rSideY = 0.0f;
+		this.b1rSideY = 0.0f - 0.5f;
+		this.b1rSideZ = 0.0f;
 
 		this.b1backX = 0.0f;
-		this.b1backY = 0.0f;
+		this.b1backY = 0.0f - 0.5f;
 		this.b1backZ = -0.5f;
 
 		this.b1frontX = 0.0f;
-		this.b1frontY = 0.0f;
+		this.b1frontY = 0.0f - 0.5f;
 		this.b1frontZ = 0.5f;
 
 	}
@@ -453,11 +593,11 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 
 		this.b2lSideX = -0.1f;
 		this.b2lSideY = 0.0f;
-		this.b2lSideY = 0.0f;
+		this.b2lSideZ = 0.0f;
 
 		this.b2rSideX = 0.1f;
 		this.b2rSideY = 0.0f;
-		this.b2rSideY = 0.0f;
+		this.b2rSideZ = 0.0f;
 
 		this.b2backX = 0.0f;
 		this.b2backY = 0.0f;
