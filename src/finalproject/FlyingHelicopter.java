@@ -32,6 +32,10 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	// for each object we will 3 attributes: position, color, indices
 	// so need 3*2 = 6 buffers
 	private int vbo[] = new int[numberObjects * numberPerObject];
+	private boolean isGoingUp;
+	private boolean isGoingUpY;
+	private boolean isGoingUpX;
+
 
 	// for each object we can assign a type from the listed GL Primitives
 	enum Types {
@@ -203,9 +207,11 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		Matrix3D pMat = perspective(60.0f, aspect, 0.1f, 1000.0f);
 
 		
+		cameraZ = genCameraZZoom(cameraZ);
+		cameraY = genCameraYZoom(cameraY);
+
 		// here we will build the stack of the vMat and mMat
 		// TODO 01
-
 		mvStack.pushMatrix();
 		mvStack.translate(-cameraX, -cameraY, -cameraZ); // this is the vMat
 
@@ -230,7 +236,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	}
 	
 	private void drawBox2(GL4 gl,Matrix3D pMat, int mv_loc, int proj_loc) {
-		double rotateDeg = (double) System.currentTimeMillis() / 10.0;
+		double rotateDeg = (double) System.currentTimeMillis() / 0.5;
 
 		mvStack.pushMatrix();
 		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
@@ -320,7 +326,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	}
 
 	private void drawBox1(GL4 gl,Matrix3D pMat, int mv_loc, int proj_loc) {
-		double rotateDeg = 0.0;// (double) System.currentTimeMillis() / 10.0;
+		double rotateDeg = (double) System.currentTimeMillis() / 50.0;
 
 		mvStack.pushMatrix();
 		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
@@ -410,7 +416,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	}
 	
 	private void drawBox3(GL4 gl,Matrix3D pMat, int mv_loc, int proj_loc) {
-		double rotateDeg = (double) System.currentTimeMillis() / 10.0;
+		double rotateDeg = (double) System.currentTimeMillis() / 0.5;
 
 		mvStack.pushMatrix();
 		mvStack.rotate(rotateDeg / 3, 0.0, 1.0, 0.0);
@@ -505,7 +511,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		rendering_program = createShaderProgram();
 		cameraX = 0.0f;
-		cameraY = +1.0f;
+		cameraY = 0.0f;
 		cameraZ = 4.0f;
 
 		initBox1();
@@ -782,6 +788,34 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		return vfprogram;
 	}
 
+	private float genCameraZZoom(float c) {
+		if(c < 20.0f && isGoingUp) {
+			c = c+ 0.1f;
+			if(c >= 20.0f)
+				isGoingUp = false;
+		}else {
+			c = c -0.1f;
+			if(c <= 2.0f)
+				isGoingUp = true;
+		}
+		return c;
+	}
+	
+
+	
+	private float genCameraYZoom(float c) {
+		if(c < 4.0f && isGoingUpY) {
+			c = c+ 0.1f;
+			if(c >= 4.0f)
+				isGoingUpY = false;
+		}else {
+			c = c -0.1f;
+			if(c <= 2.0f)
+				isGoingUpY = true;
+		}
+		return c;
+	}
+	
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 
 	}
