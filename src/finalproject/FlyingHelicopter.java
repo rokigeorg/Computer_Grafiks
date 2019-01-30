@@ -35,6 +35,7 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	private boolean isGoingUp;
 	private boolean isGoingUpY;
 	private boolean isGoingUpX;
+	private boolean isGoingVert;
 
 
 	// for each object we can assign a type from the listed GL Primitives
@@ -206,9 +207,14 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		float aspect = (float) myCanvas.getWidth() / (float) myCanvas.getHeight();
 		Matrix3D pMat = perspective(60.0f, aspect, 0.1f, 1000.0f);
 
+		//lift camera
+		if(this.isGoingVert) {
+			cameraY = genCameraYZoom(cameraY);
+		}else {
+			cameraZ = genCameraZZoom(cameraZ);
+		}
 		
-		cameraZ = genCameraZZoom(cameraZ);
-		cameraY = genCameraYZoom(cameraY);
+		
 
 		// here we will build the stack of the vMat and mMat
 		// TODO 01
@@ -511,8 +517,9 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		rendering_program = createShaderProgram();
 		cameraX = 0.0f;
-		cameraY = 0.0f;
-		cameraZ = 4.0f;
+		cameraY = 2.0f;
+		cameraZ = 6.0f;
+		this.isGoingVert = true;
 
 		initBox1();
 		initBox2();
@@ -789,14 +796,16 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 	}
 
 	private float genCameraZZoom(float c) {
-		if(c < 20.0f && isGoingUp) {
+		if(c < 40.0f && isGoingUp) {
 			c = c+ 0.1f;
-			if(c >= 20.0f)
+			if(c >= 20.0f) {
 				isGoingUp = false;
+				}
 		}else {
 			c = c -0.1f;
-			if(c <= 2.0f)
+			if(c <= 6.0f) {
 				isGoingUp = true;
+				}
 		}
 		return c;
 	}
@@ -804,14 +813,16 @@ public class FlyingHelicopter extends JFrame implements GLEventListener {
 
 	
 	private float genCameraYZoom(float c) {
-		if(c < 4.0f && isGoingUpY) {
+		if(c < 3.0f && isGoingUpY) {
 			c = c+ 0.1f;
-			if(c >= 4.0f)
+			if(c >= 4.0f) {
 				isGoingUpY = false;
+			}
 		}else {
 			c = c -0.1f;
-			if(c <= 2.0f)
+			if(c <= -2.0f) {
 				isGoingUpY = true;
+				this.isGoingVert = false;}
 		}
 		return c;
 	}
