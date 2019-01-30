@@ -62,3 +62,8 @@ Informationsmaterialien
 	    TwoFloorsAutoDraw.java, Beschreibung
 	    von Mittwoch:
 	    TwoFloorsAutoDrawAnimate wird am Dienstag weiter gearbeitet.
+	    
+	   
+## Beispiel-Grafik
+
+<img width="402" alt="bildschirmfoto 2019-01-30 um 20 07 42" src="https://user-images.githubusercontent.com/11195563/52005761-c2b2c400-24ca-11e9-9a20-9acd3e742346.png">
